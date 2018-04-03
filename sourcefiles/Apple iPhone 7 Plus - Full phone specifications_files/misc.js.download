@@ -1,0 +1,938 @@
+ window.suggestmeyes_loaded = true;
+
+$gsm = {
+    // Tool for creating tags
+    tag: function (name, attributes, innerHTML, parent) {
+        var el = document.createElement(name);
+        for (var attr in attributes) el.setAttribute(attr, attributes[attr]);
+        if (innerHTML) el.innerHTML = innerHTML;
+        if (parent) parent.appendChild(el);
+        return el;
+    },
+
+    // Class tools
+    hasClass: function (element, clas) {
+        if (element) return (new RegExp("(\\s|^)" + clas + "(\\s|$)")).test(element.className);
+    },
+
+    addClass: function (element, clas) {
+        if (!element) return;
+        if (!$gsm.hasClass(element, clas)) element.className += " " + clas;
+    },
+
+    removeClass: function (element, clas) {
+        if (!element) return;
+        element.className = element.className.replace(new RegExp("(\\s+|^)" + clas + "(\\s+|$)"), " ");
+    },
+
+    toggleClass: function (element, clas, flag) {
+        if (typeof flag == "undefined") flag = !$gsm.hasClass(element, clas);
+        if (flag) $gsm.addClass(element, clas);
+        else $gsm.removeClass(element, clas)
+    },
+
+    // event tools
+    addEventListener: function (element, event, handler, useCapture) {
+        var eventList = event.split(/\s+/);
+        for (var i = 0; i < eventList.length; i++) { 
+            if (window.addEventListener) {
+                element.addEventListener(eventList[i], handler, useCapture);
+            } else {
+                element.attachEvent("on" + eventList[i], handler);
+            }
+        }
+    },
+
+    onload: function (handler) {
+        var doneLoading = false;
+
+        function load() {
+            if (doneLoading) return;
+            doneLoading = true;
+            handler();
+        }
+
+        $gsm.addEventListener(document, "DOMContentLoaded", load);
+        $gsm.addEventListener(window, "load", load);
+    },
+
+    // XHR tool
+    xhr: function (type, url, callback, data, fail, noParse) {
+        var request;
+
+        // get XMLHttpRequest, the cross-browser way
+        if (window.XMLHttpRequest) {
+            request = new XMLHttpRequest();
+        } else if (window.ActiveXObject) {
+            try {
+                request = new ActiveXObject("Msxml2.XMLHTTP");
+            } catch(ex) {
+                try {
+                    request = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch(ex) {
+                    return;
+                }
+            }
+        }
+
+        if (data) {
+            var arr = [];
+            for (var k in data) arr.push(k + "=" + data[k]);
+            url += "?" + arr.join("&");
+        }
+
+        request.open(type, url, true);
+
+        request.onreadystatechange = function() {
+            if (request.readyState == 4 && request.status == 200) {
+                var data; 
+
+                if (!noParse) {
+                    if (window.JSON) {
+                        // try to parse JSON natively
+                        data = JSON.parse(request.responseText);
+                    } else {
+                        // use eval() if no JSON is available
+                        data = eval("(" + request.responseText + ")");
+                    }
+
+                    callback(data);
+                } else {
+                    callback(request.responseText);
+                }                
+            } else if (request.readyState == 4 && request.status > 400) {
+                // got error, call handler function (if any)
+                if (fail) fail(request);
+            } 
+        }
+
+        try {
+            request.send();
+        } catch (ex) {
+            fail(request, ex);
+        }
+    },
+
+    // cookie tools
+    setCookie: function (name, value, days) {
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            var expires = "; expires=" + date.toGMTString();
+        } else var expires = "";
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }, 
+
+    getCookie: function (cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i<ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1);
+            if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+        }
+        return "";
+    },
+
+    loadModules: function () {
+        if (typeof MODULES_TO_LOAD == "undefined") return;
+        $gsm.xhr("GET", MODULES_TO_LOAD,
+            function (data) { 
+                $gsm.LOADED_MODULES = data; 
+                if ($gsm.__loaded) $gsm.__insertModules();
+            },
+            {}, null, true
+        );
+    },
+
+    __insertModules: function () {
+        var html = document.createElement("html");
+        html.innerHTML = $gsm.LOADED_MODULES;
+        $gsm.LOADED_MODULES = null;
+
+        var contentContainers = html.querySelectorAll("[data-module]");
+        for (var i = 0; i < contentContainers.length; i++) {
+            var container = contentContainers[i];
+            var module = container.getAttribute("data-module");
+            var target = document.querySelector('.dynamic[data-module="' + module + '"]');
+            if (target) target.innerHTML = container.innerHTML;
+        }
+    }
+}
+
+$gsm.onload(function () {
+    $gsm.__loaded = true;
+    if ($gsm.LOADED_MODULES) $gsm.__insertModules();
+});
+$gsm.loadModules();
+
+/******* IE 8 etc. fix **********/
+document.createElement('header');
+document.createElement('nav');
+document.createElement('section');
+document.createElement('article');
+document.createElement('aside');
+document.createElement('footer');
+
+if (!("flex" in document.body.style)) {
+    $gsm.addEventListener(window, "load", function () {
+        $gsm.addClass(document.querySelector(".brandmenu-v2"), "ie8");
+    });
+}
+/******* IE 8 etc. fix **********/
+
+
+
+/*!
+ * headroom.js v0.7.0 - Give your page some headroom. Hide your header until you need it
+ * Copyright (c) 2014 Nick Williams - http://wicky.nillia.ms/headroom.js
+ * License: MIT
+ */
+
+if ("bind" in Object) { // damn IE8
+    !function(a,b){"use strict";function c(a){this.callback=a,this.ticking=!1}function d(b){return b&&"undefined"!=typeof a&&(b===a||b.nodeType)}function e(a){if(arguments.length<=0)throw new Error("Missing arguments in extend function");var b,c,f=a||{};for(c=1;c<arguments.length;c++){var g=arguments[c]||{};for(b in g)f[b]="object"!=typeof f[b]||d(f[b])?f[b]||g[b]:e(f[b],g[b])}return f}function f(a){return a===Object(a)?a:{down:a,up:a}}function g(a,b){b=e(b,g.options),this.lastKnownScrollY=0,this.elem=a,this.debouncer=new c(this.update.bind(this)),this.tolerance=f(b.tolerance),this.classes=b.classes,this.offset=b.offset,this.scroller=b.scroller,this.initialised=!1,this.onPin=b.onPin,this.onUnpin=b.onUnpin,this.onTop=b.onTop,this.onNotTop=b.onNotTop}var h={bind:!!function(){}.bind,classList:"classList"in b.documentElement,rAF:!!(a.requestAnimationFrame||a.webkitRequestAnimationFrame||a.mozRequestAnimationFrame)};a.requestAnimationFrame=a.requestAnimationFrame||a.webkitRequestAnimationFrame||a.mozRequestAnimationFrame,c.prototype={constructor:c,update:function(){this.callback&&this.callback(),this.ticking=!1},requestTick:function(){this.ticking||(requestAnimationFrame(this.rafCallback||(this.rafCallback=this.update.bind(this))),this.ticking=!0)},handleEvent:function(){this.requestTick()}},g.prototype={constructor:g,init:function(){return g.cutsTheMustard?(this.elem.classList.add(this.classes.initial),setTimeout(this.attachEvent.bind(this),100),this):void 0},destroy:function(){var a=this.classes;this.initialised=!1,this.elem.classList.remove(a.unpinned,a.pinned,a.top,a.initial),this.scroller.removeEventListener("scroll",this.debouncer,!1)},attachEvent:function(){this.initialised||(this.lastKnownScrollY=this.getScrollY(),this.initialised=!0,this.scroller.addEventListener("scroll",this.debouncer,!1),this.debouncer.handleEvent())},unpin:function(){var a=this.elem.classList,b=this.classes;(a.contains(b.pinned)||!a.contains(b.unpinned))&&(a.add(b.unpinned),a.remove(b.pinned),this.onUnpin&&this.onUnpin.call(this))},pin:function(){var a=this.elem.classList,b=this.classes;a.contains(b.unpinned)&&(a.remove(b.unpinned),a.add(b.pinned),this.onPin&&this.onPin.call(this))},top:function(){var a=this.elem.classList,b=this.classes;a.contains(b.top)||(a.add(b.top),a.remove(b.notTop),this.onTop&&this.onTop.call(this))},notTop:function(){var a=this.elem.classList,b=this.classes;a.contains(b.notTop)||(a.add(b.notTop),a.remove(b.top),this.onNotTop&&this.onNotTop.call(this))},getScrollY:function(){return void 0!==this.scroller.pageYOffset?this.scroller.pageYOffset:void 0!==this.scroller.scrollTop?this.scroller.scrollTop:(b.documentElement||b.body.parentNode||b.body).scrollTop},getViewportHeight:function(){return a.innerHeight||b.documentElement.clientHeight||b.body.clientHeight},getDocumentHeight:function(){var a=b.body,c=b.documentElement;return Math.max(a.scrollHeight,c.scrollHeight,a.offsetHeight,c.offsetHeight,a.clientHeight,c.clientHeight)},getElementHeight:function(a){return Math.max(a.scrollHeight,a.offsetHeight,a.clientHeight)},getScrollerHeight:function(){return this.scroller===a||this.scroller===b.body?this.getDocumentHeight():this.getElementHeight(this.scroller)},isOutOfBounds:function(a){var b=0>a,c=a+this.getViewportHeight()>this.getScrollerHeight();return b||c},toleranceExceeded:function(a,b){return Math.abs(a-this.lastKnownScrollY)>=this.tolerance[b]},shouldUnpin:function(a,b){var c=a>this.lastKnownScrollY,d=a>=this.offset;return c&&d&&b},shouldPin:function(a,b){var c=a<this.lastKnownScrollY,d=a<=this.offset;return c&&b||d},update:function(){var a=this.getScrollY(),b=a>this.lastKnownScrollY?"down":"up",c=this.toleranceExceeded(a,b);this.isOutOfBounds(a)||(a<=this.offset?this.top():this.notTop(),this.shouldUnpin(a,c)?this.unpin():this.shouldPin(a,c)&&this.pin(),this.lastKnownScrollY=a)}},g.options={tolerance:{up:0,down:0},offset:0,scroller:a,classes:{pinned:"headroom--pinned",unpinned:"headroom--unpinned",top:"headroom--top",notTop:"headroom--not-top",initial:"headroom"}},g.cutsTheMustard="undefined"!=typeof h&&h.rAF&&h.bind&&h.classList,a.Headroom=g}(window,document);
+}
+
+
+// social network share/tweets counts
+function countUp($item){
+    return setTimeout(function() {
+        var current, newCount, target;
+        current = $item.attr("data-current-count") * 1;
+        target = $item.attr("data-target-count") * 1;
+        newCount = current + Math.ceil((target - current) / 2);
+        $item.attr("data-current-count", newCount);
+        $item.html(newCount);
+        
+        if (newCount < target) {
+            return countUp($item);
+        }
+    }, 100);
+};
+
+function getSocialCount(url){
+    
+    $.getJSON("http://graph.facebook.com/" + url, function(json) {
+        return setCount($(".fbCount"), json.shares);
+    });
+
+    $.getJSON("http://urls.api.twitter.com/1/urls/count.json?url=" + url + "&callback=?", function(json) {
+        return setCount($(".twCount"), json.count);
+    });
+
+    $.getJSON('https://count.donreach.com/?url=' + url + "&callback=?", function (json) {
+        return setCount($(".goCount"), json.shares.google);
+    });
+}
+
+function setCount($item, count) {
+    if (count == null) {
+        count = null;
+    }
+    $item.attr("data-target-count", count);
+    $item.attr("data-current-count", 0);
+    return countUp($item);
+};
+
+
+$gsm.onload(function () {
+    // Uncomment to see the numbers
+    // getSocialCount(sURLSocialE);
+
+    // open/close nav menu
+    var menuButton = document.querySelector('.lines-button');
+    if (menuButton) menuButton.onclick = function () {
+        var close = !$gsm.hasClass(menuButton, "open");
+        $gsm.toggleClass(menuButton, "open", close);
+        $gsm.toggleClass(document.querySelector('#menu'), "open", close);
+        $gsm.toggleClass(document.querySelector("#header"), "open", close);
+
+        $gsm.setCookie("sSubmenuState", close? "open" : "close", 7);
+        
+        stickyAdScrollEventHandler();
+    }
+
+    if ("Headroom" in window) { // damn IE8
+        // configure sticky header
+        new Headroom(document.getElementById("header"), {
+            tolerance: {
+                down : 10,
+                up : 20
+            },
+            offset : 52,
+            classes: {
+                initial: "slide",
+                pinned: "slide--reset",
+                unpinned: "slide--up"
+            }
+        }).init();
+    }
+
+    // toggle extra reviews on home page
+    var elem = document.querySelector(".more-reviews-list-container");
+    var link = document.querySelector(".more-reviews-list-toggle");
+
+    if (link) link.onclick = function() {
+        if (elem.style.display == "block") {
+            elem.style.display = "none";
+            link.innerHTML = "&#9650;";
+        } else {
+            elem.style.display = "block";
+            link.innerHTML = "&#9660;";
+        }
+        return false;
+    }
+
+    // become a fan
+    var loggedIn = $gsm.hasClass(document.querySelector('a.signup-icon i'), "icon-signout");
+    var becomeAFan = document.querySelector(".specs-fans");
+
+    if (becomeAFan) { // do nothing on non-specs pages        
+        var phoneId = window.location.toString().match(/-(\d+)(?:p\d+)?\.php/)[1];
+        if (phoneId) becomeAFan.onclick = function () {
+            var fan = !$gsm.hasClass(becomeAFan.parentNode, "active");
+            if (!loggedIn) {
+                $gsm.addClass(becomeAFan.parentNode, "not-logged");
+                setTimeout(function () {
+                    $gsm.removeClass(becomeAFan.parentNode, "not-logged");
+                }, 4000);
+            } else{
+                $gsm.xhr("GET", "becomeafan-js.php3", function (data) {
+                    // toggle class as needed
+                    $gsm.toggleClass(becomeAFan.parentNode, "active", data == "1" && fan);
+                    // update score and labels
+                    if (data == "1") {
+                        var strong = becomeAFan.querySelector("strong");
+                        var score = parseInt(strong.lastChild.nodeValue, 10);
+                        score += fan? 1 : -1;
+                        strong.replaceChild(document.createTextNode("" + score), strong.lastChild);
+                        becomeAFan.querySelector("span").innerHTML = fan? "You're a fan" : "Become a fan";
+                    }
+                }, {idPhone: phoneId, nFan: fan? 1 : 0}, function () {
+                    $gsm.removeClass(becomeAFan.parentNode, "active");
+                }, true);
+            }
+
+            return false;
+        }
+    }
+
+    var loginLink = document.querySelector("#login-active"); 
+    var loginPopup = document.querySelector("#login-popup");
+    if (loginLink) loginLink.onclick =function (event) {
+        if (loggedIn) return;
+        event.preventDefault();
+        loginPopup.style.display = loginPopup.style.display == "block"?  "none" : "block";
+    };
+
+    var header = document.querySelector("#header");
+    var footerLeft = document.querySelector("#footer-side");
+    var stickyAd = document.querySelector(".adv.sticky");
+    if (stickyAd) {
+        var elementBeforeStickyAd = stickyAd.previousElementSibling;
+        var MIN_WINDOW_HEIGHT_FOR_STICKY_AD;
+
+        function _calculateMinWindowHeightForStickyAd() {
+            MIN_WINDOW_HEIGHT_FOR_STICKY_AD = stickyAd.offsetHeight + 
+                                            (footerLeft? footerLeft.offsetHeight : 0) +
+                                            header.offsetHeight +
+                                            30; // some extra padding
+
+            if (window.innerHeight < MIN_WINDOW_HEIGHT_FOR_STICKY_AD) {
+                stickyAd.style.position = "";
+                stickyAd.style.top = "";
+            }
+
+        }
+        _calculateMinWindowHeightForStickyAd();
+        $gsm.addEventListener(window, "resize", _calculateMinWindowHeightForStickyAd);
+
+        function stickyAdScrollEventHandler(event) {
+            if (stickyAd.style.position !== "" && elementBeforeStickyAd.getBoundingClientRect().bottom > 0) {
+                stickyAd.style.position = "";
+                stickyAd.style.top = "";
+            } else if (window.innerHeight > MIN_WINDOW_HEIGHT_FOR_STICKY_AD && 
+                       stickyAd.style.position !== "fixed" && stickyAd.getBoundingClientRect().top < 10) {
+                stickyAd.style.position = "fixed";
+                stickyAd.style.top = "8px";
+            }
+
+            if (stickyAd.style.position == "fixed") {
+                stickyAd.style.top = (8 + (header.getBoundingClientRect().bottom > 0? header.offsetHeight : 0)) + "px";
+            }
+        }
+        $gsm.addEventListener(window, "scroll", stickyAdScrollEventHandler);
+    }
+});
+
+var ImagePopup = function () {};
+$gsm.onload(function () {
+    var serverUrl = "";
+
+    ImagePopup = function (baseUrl, url) {
+        serverUrl = baseUrl;
+        _ShowImg(url);
+    }
+
+    var imageGallery   = $gsm.tag("div", {"class": "image-gallery", "style": "display: none;"}, "", document.body);
+    
+    var topRow         = $gsm.tag("div", {"class": "top-row"}, "", imageGallery);
+    var header         = $gsm.tag("div", {"class": "header"}, "", topRow);
+    var title          = $gsm.tag("span", {"class": "title"}, "", header);
+    var logo           = $gsm.tag("div", {"class": "logo"}, "", header);
+    logo.innerHTML     = '<object type="image/svg+xml" data="http://cdn.gsmarena.com/vv/assets8/i/logo.svg"><img src="http://cdn.gsmarena.com/vv/assets8/i/logo-fallback.gif" alt="GSMArena.com"></object>';
+    var buttons        = $gsm.tag("div", {"class": "buttons"}, "", topRow);
+    var zoomButton     = $gsm.tag("div", {"class": "gbutton zoom", "title": "Zoom in"}, "", buttons);
+    var newTabButton   = $gsm.tag("a", {"class": "gbutton new-tab", "title": "Open image in new tab", "target": "_blank"}, "", buttons);
+    var shareCheckbox  = $gsm.tag("input", {"type": "checkbox", "id": "gallery-share-checkbox"}, "", buttons);
+    var shareButton    = $gsm.tag("label", {"class": "gbutton share", "title": "Share image", "for": "gallery-share-checkbox"}, "", buttons);
+    var closeButton    = $gsm.tag("div", {"class": "gbutton close", "title": "Close gallery"}, "", buttons);
+
+    var sharePanel     = $gsm.tag("span", {"class": "share-panel"}, "", shareButton);
+    var shareFacebook  = $gsm.tag("a", {"class": "facebook", "title": "Share on Facebook"}, "&#59652;", sharePanel);
+    var shareTwitter   = $gsm.tag("a", {"class": "twitter",  "title": "Share on Twitter"},  "&#59655;", sharePanel);
+
+    var bottomRow      = $gsm.tag("div", {"class": "bottom-row"}, "", imageGallery);
+    var leftColumn     = $gsm.tag("div", {"class": "left-column"}, "", bottomRow);
+    var imageContainer = $gsm.tag("div", {"class": "image-container"}, "", leftColumn);
+    var secondImage    = $gsm.tag("div", {"class": "second image"}, "", imageContainer); // second image first so it has a lower z-index
+    var image          = $gsm.tag("div", {"class": "image"}, "", imageContainer);
+    var nextPrev       = $gsm.tag("div", {"class": "next-prev"}, "", imageContainer);
+    var prev           = $gsm.tag("a", {"class": "go-left", "href": "#prev"}, "", nextPrev);
+    var next           = $gsm.tag("a", {"class": "go-right", "href": "#next"}, "", nextPrev);
+    var map            = $gsm.tag("div", {"class": "map", "style": "display: none;"}, "", image);
+    var mapView        = $gsm.tag("div", {"class": "view"}, "", map);
+    var imageDetails   = $gsm.tag("div", {"class": "image-details"}, "", leftColumn);
+    var imageText      = $gsm.tag("span", {"class": "image-text"}, "", imageDetails);
+    var imageCount     = $gsm.tag("span", {"class": "image-count"}, "", imageDetails);
+
+    var rightColumn    = $gsm.tag("div", {"class": "right-column"}, "", bottomRow);
+    var ad             = $gsm.tag("div", {"class": "ad", "id": "crt-766803"}, "", rightColumn);
+    var thumbContainer = $gsm.tag("div", {"class": "thumb-gallery"}, "", rightColumn);
+    var prevThumbs     = $gsm.tag("a", {"class": "go-up", "href": "#up"}, "&#9650;", thumbContainer);
+    var thumbs         = $gsm.tag("div", {"class": "thumbs"}, "", thumbContainer);
+    var nextThumbs     = $gsm.tag("a", {"class": "go-down", "href": "#down"}, "&#9660;", thumbContainer);
+
+    var articleInfoName = document.querySelector(".article-info-name");
+    var galleryName = document.querySelector("#gallery .normal-text h2")
+    title.innerHTML = (articleInfoName || galleryName || {innerHTML: ""}).innerHTML;
+
+    // ADS DEMO
+    /*var ADS = [
+        {img: "http://cdn.gsmarena.com/vv/assets9/static/gallery-banner/s8.jpg", href: "https://www.youtube.com/watch?v=hG8VrdydZV0"}, 
+        {img: "http://cdn.gsmarena.com/vv/assets9/static/gallery-banner/g6.jpg", href: "https://www.youtube.com/watch?v=SAPm0EkuDFQ"},
+        {img: "http://cdn.gsmarena.com/vv/assets9/static/gallery-banner/xzs.jpg", href: "https://www.youtube.com/watch?v=FalM0KV22jM"}
+    ];*/
+
+    
+    var currentAd = -1;
+    var loadingAdScript = false;
+    function nextAd() {
+        if (typeof Criteo == "undefined" && !loadingAdScript) {
+            loadingAdScript = true;
+            var adScript = $gsm.tag("script", {"type": "text/javascript", "src": "//static.criteo.net/js/ld/publishertag.js"}, "", rightColumn);
+            adScript.onload = nextAd;
+            return;
+        }
+        
+        ad.innerHTML = "";
+        if (typeof Criteo !== "undefined") Criteo.DisplayAd({
+            'zoneid' : 766803,
+            'containerid' : 'crt-766803'
+        });
+    }
+
+    var zoomable = false, zoomedIn = false;
+    var thumbLinks = false;
+    var thumbLinksByIndex = [];
+    var currentIndex = 0;
+    var thumbnailCount = 0;
+    var imageObject = new Image();
+    var thumbImageObject = new Image();
+
+    function computedStyle(element, style) {
+        if (window.getComputedStyle) {
+            return parseInt(window.getComputedStyle(element)[style], 10);
+        } else {
+            return parseInt(element.currentStyle[style], 10);
+        }
+    }
+
+    function scrollThumbContainer(offset) {
+        var activeThumb = imageGallery.querySelector(".thumb.active");
+        var containerHeight = thumbs.offsetHeight;
+
+        if (offset) { // scrolling with up/down arrows
+            var position = Math.floor(thumbs.scrollTop / containerHeight);
+            position += offset;
+        } else { // scrolling because active thumb went offscreen
+            var position = Math.floor(activeThumb.offsetTop / containerHeight);
+        }
+        thumbs.scrollTop = position * containerHeight;
+    }
+
+    function findThumbLinks() {
+        thumbLinks = {};
+        // find all links that call ShowImg
+        var linksElements = document.querySelectorAll("a[onclick^='javascript:ShowImg']");
+        thumbs.innerHTML = "";
+        // list of thumb links
+        var list = [];
+        // thumb wrap width, total width of thumbnails
+        var wrapWidth = 0; 
+        var totalThumbnailWidth = 0;
+        thumbnailCount = linksElements.length;
+
+        for (var i = 0; i < linksElements.length; i++) {
+            var link = linksElements[i];
+            var onclick = link.getAttribute("onclick");
+            var bigUrl = onclick.match(/ShowImg2?\(["']([^"']+?)["']\)/)[1];
+            var smallUrl = link.children[0].getAttribute("src");
+            var alt = link.children[0].getAttribute("alt");
+            alt = alt.replace(/ - (?:[^-]|\w-\w)+$/, "");
+            alt = alt.replace(/^[a-z][^A-Z]/, function (s) {
+                return s.charAt(0).toUpperCase() + s.slice(1);
+            });
+
+            var thumb = $gsm.tag(
+                "div", {
+                    "class": "thumb", 
+                    "style": "background-image: url(" + smallUrl + ");"
+                }, 
+                "", thumbs
+            );
+            var ShowImgVersion = onclick.match(/ShowImg2?/)[0];
+            (function (bigUrl, index, _ShowImgVersion) { // capture correct bigUrl
+                thumb.onclick = function () { _ShowImg(bigUrl, index, _ShowImgVersion); nextAd(); return false; };
+                link.onclick = thumb.onclick; // in case of duplicates
+            })(bigUrl, i, ShowImgVersion);
+
+            thumbLinks[bigUrl] = {
+                thumbLink: thumb,
+                bigUrl: bigUrl,
+                smallUrl: smallUrl,
+                alt: alt,
+                index: i
+            };
+
+            thumbLinksByIndex[i] = thumbLinks[bigUrl];
+        }
+    }
+    // replace thumbnails' onclick handlers with gallery click handlers
+    findThumbLinks();
+    
+    function showLightbox(on) {
+        imageGallery.style.display = on? "" : "none";
+    }
+
+    function closeGallery() { 
+        zoomable = zoomedIn = false;
+        showLightbox(false);
+        history.replaceState({}, "", window.location.pathname + window.location.search)
+        return false;
+    };
+    closeButton.onclick = closeGallery;
+
+    function _ShowImg(url, index, ShowImgVersion) {
+        if (serverUrl == "") {
+            // grab serverURL from ShowImg/ShowImg2
+            if (ShowImgVersion == "ShowImg") ShowImg(url);
+            else ShowImg2(url); // if no ShowImgVersion is provided, guess ShowImg2
+        }
+
+        showLightbox(true);
+        if (!thumbLinks) findThumbLinks();
+
+        if (typeof index !== "undefined") {
+            var thumb = thumbLinksByIndex[index];
+            currentIndex = index;
+        } else {
+            var thumb = thumbLinks[url];
+            currentIndex = thumb.index;
+        }
+        // change image
+        imageObject.src = serverUrl + url;
+        thumbImageObject.src = thumb.smallUrl;
+        secondImage.style.backgroundImage = image.style.backgroundImage;
+        image.style.backgroundImage = "url(" + serverUrl + url + "), " +
+                                      "url(" + thumb.smallUrl +  ")";
+        image.style.backgroundPosition = "";
+        image.style.backgroundSize = "";
+        // change Open in new tab link
+        newTabButton.setAttribute("href", imageObject.src);
+        // show placeholder
+
+        // change image text
+        imageText.innerHTML = thumb.alt;
+        // change image index
+        imageCount.innerHTML = (thumb.index + 1) + "/" + thumbnailCount;
+        // remove 'active' from old thumb
+        $gsm.removeClass(imageGallery.querySelector(".thumb.active"), "active");
+        // add 'active' to new thumb
+        $gsm.addClass(thumb.thumbLink, "active");
+        // scroll the thumb container so that the active thumb is visible
+        scrollThumbContainer();
+        
+        // reset zoom
+        zoomedIn = false;
+        zoomable = !!url.match(/\/camera\//);
+        $gsm.removeClass(imageGallery, "zoomed-in");
+        map.style.display = "none";
+        map.style.backgroundImage = "url(" + serverUrl + url + ")";
+
+        // hide ad & thumbs if needed
+        checkShouldHideAd();
+
+        // add # with the current image
+        history.replaceState({}, "", "#image" + thumb.index);
+
+        // set up share buttons
+        shareCheckbox.checked = false;
+        shareFacebook.setAttribute("href", "http://www.facebook.com/sharer.php?u=" + encodeURIComponent(window.location));
+        shareTwitter.setAttribute("href",  "https://twitter.com/intent/tweet?text="+ escape(thumb.alt) + 
+                                                                           "&url=" + encodeURIComponent(window.location));
+
+        return false;
+    }
+
+    imageObject.onload = function () {
+        refreshOnResizeOrRotate();
+    }
+
+    var _slideAnimationTimeout = 0;
+    var _rememberMoves = 0;
+    function nextPrevImage(event, direction) {
+        var dir = direction || this.getAttribute("href").replace("#", "");
+        if (_slideAnimationTimeout) {
+            _rememberMoves += dir == "next"? 1 : -1;
+            return;
+        }
+        var current = imageGallery.querySelector(".thumb.active");
+
+        // preserve background size
+        secondImage.style.backgroundSize = image.style.backgroundSize;
+        
+        // change image
+        var nextIndex = currentIndex + (dir == "next"? 1 : -1);
+        nextIndex = (nextIndex + thumbnailCount) % thumbnailCount;
+        thumbLinksByIndex[nextIndex].thumbLink.onclick();
+
+        // preload next image
+        nextIndex = nextIndex + (dir == "next"? 1 : -1);
+        nextIndex = (nextIndex + thumbnailCount) % thumbnailCount;
+        var preload = new Image();
+        preload.src = serverUrl + thumbLinksByIndex[nextIndex].bigUrl;
+
+        // animate transition
+        $gsm.addClass(imageContainer, dir == "next"? "slide-left" : "slide-right");
+        _slideAnimationTimeout = setTimeout(function () { 
+            _slideAnimationTimeout = 0;
+
+            $gsm.removeClass(imageContainer, "slide-left"); $gsm.removeClass(imageContainer, "slide-right"); 
+
+            // in case next/prev was called by touchmove
+            secondImage.style.display = "";
+            secondImage.style.transform = "";
+            image.style.transform = "";
+            image.style.backgroundSize = _backgroundSizeForImage();
+        }, 450); // 50ms less than css animation length to prevent secondImage flashing on screen
+
+
+        return false;
+    }
+    next.onclick = nextPrevImage;
+    prev.onclick = nextPrevImage;
+
+    $gsm.addEventListener(document, "keyup", function (event) {
+        if (imageGallery.style.display == "none") return;
+
+        if (event.which == 27) {
+            // ESCAPE
+            closeGallery();
+        } else if (event.which == 37 || event.which == 39) {
+            // LEFT/RIGHT
+            nextPrevImage(null, event.which == 37? "prev" : "next");
+        }
+    });
+
+    // scroll to that page of thumbnails
+    function nextPrevThumbs() {
+        var dir = this.getAttribute("href").replace("#", "");
+        scrollThumbContainer(dir == "up"? -1 : 1);
+        return false;
+    }
+    nextThumbs.onclick = nextPrevThumbs;
+    prevThumbs.onclick = nextPrevThumbs;
+
+    zoomButton.onclick = function (event) {
+        zoomedIn = !zoomedIn;
+        $gsm.toggleClass(imageGallery, "zoomed-in");
+        map.style.display = zoomedIn? "" : "none";
+        if (zoomedIn) {
+            image.style.backgroundSize = "auto, 0";
+
+            calculateMapWindowSize();
+
+            if (event.target == zoomButton) { 
+                // clicking the zoom button shows the image center
+                positionImage(0.5, 0.5);
+            } else { 
+                // otherwise center on the part of the image that was clicked
+                positionImage(event.clientX / image.offsetWidth, event.clientY / image.offsetHeight);
+            }
+        } else {
+            image.style.backgroundSize = _backgroundSizeForImage();
+            image.style.backgroundPosition = "center center";
+        }
+
+        return false;
+    }
+
+    function _backgroundSizeForImage() {
+        var x = containRectInRect(
+            [thumbImageObject.naturalWidth, thumbImageObject.naturalHeight],
+            containRectInRect(
+                [imageObject.naturalWidth, imageObject.naturalHeight],
+                [image.clientWidth, image.clientHeight]
+            )
+        );
+
+        return "contain, " + x[0] + "px " + x[1] + "px";
+    }
+
+    function containRectInRect(rect1, rect2, dontRound) {
+        var size = [0, 0];
+        var aspect1 = rect1[0] / rect1[1];
+        var aspect2 = rect2[0] / rect2[1];
+
+        if (aspect1 > aspect2) {
+            size[0] = rect2[0];
+            size[1] = rect2[0] / aspect1;
+        } else { 
+            size[0] = rect2[1] * aspect1;
+            size[1] = rect2[1];
+        }
+
+        if (!dontRound) {
+            size[0] = Math.floor(size[0]);
+            size[1] = Math.floor(size[1]);
+        }
+
+        return size;
+    }
+
+    var mapSize = [1, 1];
+
+    function calculateMapWindowSize() {
+        // calculate the size of the minimap
+        mapSize = containRectInRect([imageObject.width, imageObject.height], [map.offsetWidth, map.offsetHeight]);
+
+        // calculate mapwindow dimensions
+        var w, h;
+        try {
+            var size = Math.min(mapSize[0], mapSize[1]);
+            w = Math.round(size * image.offsetWidth  / imageObject.height);
+            h = Math.round(size * image.offsetHeight / imageObject.height);
+        } catch (ex) {
+            // Damn IE8
+            w = 20;
+            h = 20;
+        }
+
+        mapView.style.width  = w + "px";
+        mapView.style.height = h + "px";
+
+        return [w, h];
+    }
+
+    $gsm.addEventListener(image, "click", function (event) {
+        if (zoomable) zoomButton.onclick(event);
+    });
+
+    function positionImage(px, py) {
+        px = Math.min(Math.max(0, px), 1);
+        py = Math.min(Math.max(0, py), 1);
+
+        image.style.backgroundPosition = "" + (px * 100) + "% " +
+                                              (py * 100) + "%";
+                                              
+        // move green map window
+        mapView.style.transform = "translate(" + Math.round(px * (mapSize[0] - mapView.offsetWidth))  + "px, " +
+                                                 Math.round(py * (mapSize[1] - mapView.offsetHeight)) + "px)"; 
+    }
+
+    $gsm.addEventListener(image, "mousemove", function (event) {
+        // do nothing if image is not zoomable or we've locked the zoom
+        if (!zoomable || !zoomedIn) return;
+
+        // work out position in relative coordinates
+        var px = (event.offsetX / image.offsetWidth);
+        var py = (event.offsetY / image.offsetHeight);
+
+        positionImage(px, py);
+    });
+
+    var scale = Math.sqrt(window.devicePixelRatio || 1); // screen pixels per CSS pixel
+    var firstTouchLeft = 0, originalX = 0;
+    var firstTouchTop  = 0, originalY = 0;
+    var lastTouchMoveTime = 0, inertiaInterval;
+    var inertiaDx = 0, inertiaDy = 0;
+    $gsm.addEventListener(document, "touchstart", function (event) {
+        var positions = image.style.backgroundPosition.split(" ");
+        originalX = parseFloat(positions[0], 10) / 100.0 || 0.5;
+        originalY = parseFloat(positions[1], 10) / 100.0 || 0.5;
+        firstTouchLeft = event.touches[0].clientX;
+        firstTouchTop  = event.touches[0].clientY;
+
+        secondImage.style.backgroundSize = image.style.backgroundSize;
+        
+        clearInterval(inertiaInterval);
+    });
+    $gsm.addEventListener(imageGallery, "touchmove", function (event) {
+        event.preventDefault(); // prevent scrolls
+        event.stopPropagation();
+    });
+    $gsm.addEventListener(image, "touchmove", function (event) {
+        if (zoomedIn) {
+            lastTouchMoveTime = Date.now();
+
+            inertiaDx = (firstTouchLeft - event.touches[0].clientX) / imageObject.height; 
+            inertiaDy = (firstTouchTop  - event.touches[0].clientY) / imageObject.height;
+
+            positionImage(originalX + inertiaDx, originalY + inertiaDy);
+        } else {
+            if (secondImage.style.display != "block") {
+                secondImage.style.backgroundImage = image.style.backgroundImage;
+                secondImage.style.display = "block";
+                image.style.display = "none";
+            }
+            inertiaDx = event.touches[0].clientX - firstTouchLeft;
+            secondImage.style.transform = "translateX(" + inertiaDx + "px)";
+        }
+    });
+    $gsm.addEventListener(image, "touchend", function (event) {
+        if (zoomedIn) {
+            var mspf = 33.0; // ms per frame
+            var friction = 0.80; // reduce inertia at each frame
+
+            var positions = image.style.backgroundPosition.split(" ");
+            var newX = parseFloat(positions[0], 10) / 100.0;
+            var newY = parseFloat(positions[1], 10) / 100.0;
+            var dx = inertiaDx, dy = inertiaDy;
+
+            if (Date.now() - lastTouchMoveTime > mspf) return;
+
+            inertiaInterval = setInterval(function () {
+                if (Math.abs(dx * dy) < 0.00000001) clearInterval(inertiaInterval);
+
+                dx *= friction; dy *= friction;
+                newX += dx; newY += dy;
+
+                positionImage(newX, newY);
+            }, mspf);
+        } else {
+            if (Math.abs(inertiaDx / imageContainer.offsetWidth) > 0.2) {
+                // move to next/previous image
+
+                image.style.display = "";
+                nextPrevImage({}, inertiaDx > 0? "prev" : "next");
+            } else {
+                // animate the same image back to center
+
+                var transitionTime = 0.3;
+                secondImage.style.transform = "";
+                secondImage.style.transition = "transform " + transitionTime + "s";
+                setTimeout(function () { 
+                    secondImage.style.transition = ""; 
+                    secondImage.style.display = "";
+                    image.style.display = "";
+                }, transitionTime * 1000);
+            }
+        }
+    });
+
+    // TODO: are ad and thumb gallery sizes fixed?
+    var adAndThumbGalleryHeight = 620;
+    var adAndThumbGalleryWidth = 790;
+    var fixedLogoWidth = computedStyle(header, "padding-left") + computedStyle(logo, "width") + 20;
+    function checkShouldHideAd() {
+        if (window.innerWidth > window.innerHeight) {
+            var shouldHideAd = rightColumn.offsetHeight < adAndThumbGalleryHeight;
+        } else {
+            var shouldHideAd = rightColumn.offsetWidth < adAndThumbGalleryWidth;
+        }
+        thumbContainer.style.display = shouldHideAd? "none" : "";
+
+        var shouldHideLogo = header.offsetWidth < fixedLogoWidth + title.offsetWidth;
+        logo.style.display = shouldHideLogo? "none" : "";
+    }
+   
+    function refreshOnResizeOrRotate() {
+        setTimeout(function () {
+            
+            if (zoomedIn) {
+                calculateMapWindowSize();
+
+                var imagePosition = image.style.backgroundPosition.split(" ");
+                var px = parseFloat(imagePosition[0], 10) / 100.0;
+                var py = parseFloat(imagePosition[1], 10) / 100.0;
+
+                positionImage(px, py);
+            } else {
+                image.style.backgroundSize = _backgroundSizeForImage();
+            }
+
+            // check if its possible to zoom in
+            zoomable = (imageObject.width > image.offsetWidth && imageObject.height > image.offsetHeight) 
+            $gsm.toggleClass(imageGallery, "zoomable", zoomable);
+            if (!zoomable && zoomedIn) zoomButton.onclick(); // zoom out if it gallery was previously zoomed in
+
+            checkShouldHideAd();
+        }, 10);
+    }
+    $gsm.addEventListener(window, "resize", refreshOnResizeOrRotate);
+    $gsm.addEventListener(window, "orientationchange", refreshOnResizeOrRotate);
+
+
+    // Open shared images on load
+
+    var galleryHash = window.location.hash.match(/#image(\d+)/);
+    if (galleryHash) {
+        var lookingFor = parseInt(galleryHash[1], 10);
+        if (!thumbLinks) findThumbLinks();
+        thumbLinksByIndex[lookingFor].thumbLink.onclick();
+    }
+
+    // share buttons
+
+    shareFacebook.onclick = function () {
+        var url = "http://www.facebook.com/sharer.php?u=" + encodeURIComponent(window.location);
+        window.open(url,'fbookshare','width=500,height=400,left='+(screen.availWidth/2-225)+',top='+(screen.availHeight/2-150)+'');
+        return false;
+    }
+    shareTwitter.onclick = function () {
+        var url = "https://twitter.com/intent/tweet";
+        url += "?text=" + escape(imageText.innerHTML);
+        url += "&url="  + encodeURIComponent(window.location);
+        window.open(url,'twitshare','width=500,height=400,left='+(screen.availWidth/2-225)+',top='+(screen.availHeight/2-150)+'');return false;
+    }
+});
+
+(function () {
+    window.addEventListener("DOMContentLoaded", function () {
+        var speedos = document.querySelectorAll(".speedo");
+
+        if (speedos && speedos.length) {
+            window.addEventListener("scroll", function () {
+                for (var i = 0; speedos && i < speedos.length; i++) {
+                    var speedo = speedos[i];
+
+                    if (speedo.getClientRects()[0].bottom < window.innerHeight) {
+                        var rotation = parseInt(speedo.getAttribute("data-value"), 10) * 1.8;
+                        speedo.querySelector("#needle").style.transform = "rotate(" + rotation + "deg)";
+                    }
+                }
+            });
+        }
+    });
+})();

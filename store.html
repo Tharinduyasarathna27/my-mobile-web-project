@@ -1,0 +1,1186 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Mobilestore Website Template | About :: W3layouts</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css"  media="all" />
+		<meta name="keywords" content="Mobilestore iphone web template, Andriod web template, Smartphone web template, free webdesigns for Nokia, Samsung, LG, SonyErricsson, Motorola web design" />
+		<link href='http://fonts.googleapis.com/css?family=Londrina+Solid|Coda+Caption:800|Open+Sans' rel='stylesheet' type='text/css'>
+		<script type="text/javascript" src="js/jquery-1.3.2.js"></script>
+		<script type="text/javascript" src="js/jquery.livequery.js"></script>
+		<link href="css/style1.css" rel="stylesheet" />
+		<script type="text/javascript">
+
+$(document).ready(function() {
+	
+	var Arrays=new Array();
+	
+	$('.add-to-cart-button').click(function(){
+		
+		var thisID 	  = $(this).parent().parent().attr('id').replace('detail-','');
+		
+		var itemname   = $(this).parent().find('.item_name').html();
+		var itemprice  = $(this).parent().find('.price').html();
+		
+		
+		if(include(Arrays,thisID))
+		{
+			var price 	 = $('#each-'+thisID).children(".shopp-price").find('em').html();
+			var quantity = $('#each-'+thisID).children(".shopp-quantity").html();
+			quantity = parseInt(quantity)+parseInt(1);
+			
+			var total = parseInt(itemprice)*parseInt(quantity);
+			
+			$('#each-'+thisID).children(".shopp-price").find('em').html(total);
+			$('#each-'+thisID).children(".shopp-quantity").html(quantity);
+			
+			var prev_charges = $('.cart-total span').html();
+			prev_charges = parseInt(prev_charges)-parseInt(price);
+			
+			prev_charges = parseInt(prev_charges)+parseInt(total);
+			$('.cart-total span').html(prev_charges);
+			
+			$('#total-hidden-charges').val(prev_charges);
+			
+		}
+		else
+		{
+			Arrays.push(thisID);
+			
+			var prev_charges = $('.cart-total span').html();
+			prev_charges = parseInt(prev_charges)+parseInt(itemprice);
+			
+			$('.cart-total span').html(prev_charges);
+			$('#total-hidden-charges').val(prev_charges);
+			
+			var Height = $('#cart_wrapper').height();
+			$('#cart_wrapper').css({height:Height+parseInt(45)});
+			
+			$('#cart_wrapper .cart-info').append('<div class="shopp" id="each-'+thisID+'"><div class="label">'+itemname+'</div><div class="shopp-price"> $<em>'+itemprice+'</em></div><span class="shopp-quantity">1</span><img src="images/remove.png" class="remove" /><br class="all" /></div>');
+			
+		}
+		
+	});	
+	
+	$('.remove').livequery('click', function() {
+		
+		var deduct = $(this).parent().children(".shopp-price").find('em').html();
+		var prev_charges = $('.cart-total span').html();
+		
+		var thisID = $(this).parent().attr('id').replace('each-','');
+		
+		var pos = getpos(Arrays,thisID);
+		Arrays.splice(pos,1,"0")
+		
+		prev_charges = parseInt(prev_charges)-parseInt(deduct);
+		$('.cart-total span').html(prev_charges);
+		$('#total-hidden-charges').val(prev_charges);
+		$(this).parent().remove();
+		
+	});	
+	
+	$('#Submit').livequery('click', function() {
+		
+		var totalCharge = $('#total-hidden-charges').val();
+		
+		$('#cart_wrapper').html('Total Charges: $'+totalCharge);
+		
+		return false;
+		
+	});	
+	
+	
+	var single_li_offset 	= 200;
+	var current_opened_box  = -1;
+	
+	$('#wrap li').click(function() {
+	
+		var thisID = $(this).attr('id');
+		var $this  = $(this);
+		
+		var id = $('#wrap li').index($this);
+		
+		if(current_opened_box == id) 
+		{
+			$('#wrap .detail-view').slideUp('slow');
+			return false;
+		}
+		$('#cart_wrapper').slideUp('slow');
+		$('#wrap .detail-view').slideUp('slow');
+		
+		
+		current_opened_box = id;
+		
+		var targetOffset = 0;
+		
+		
+		
+		if(id<=3)
+			targetOffset = 0;
+		else if(id<=7)
+			targetOffset = single_li_offset;
+		else if(id<=11)
+			targetOffset = single_li_offset*2;
+		else if(id<=15)
+			targetOffset = single_li_offset*3;
+		
+		$("html:not(:animated),body:not(:animated)").animate({scrollTop: targetOffset}, 800,function(){
+			
+			$('#wrap #detail-'+thisID).slideDown(500);
+			return false;
+		});
+		
+	});
+	
+	$('.close a').click(function() {
+		
+		$('#wrap .detail-view').slideUp('slow');
+		
+	});
+	
+	$('.closeCart').click(function() {
+		
+		$('#cart_wrapper').slideUp();
+		
+	});
+	
+	$('#show_cart').click(function() {
+		
+		$('#cart_wrapper').slideToggle('slow');
+		
+	});
+	
+});
+
+function include(arr, obj) {
+  for(var i=0; i<arr.length; i++) {
+    if (arr[i] == obj) return true;
+  }
+}
+
+
+function getpos(arr, obj) {
+  for(var i=0; i<arr.length; i++) {
+    if (arr[i] == obj) return i;
+  }
+}
+var modal = document.getElementById('myModal');
+var btn = document.getElementById("myBtn");
+var span = document.getElementsByClassName("close")[0];
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+
+</script>
+<script>
+						function move() {
+						    var elem = document.getElementById("myBar"); 
+						    var width = 1;
+						    var id = setInterval(frame, 1);
+						    function frame() {
+						        if (width >= 100) {
+						            clearInterval(id);
+						        } else {
+						            width++; 
+						            elem.style.width = width + '%'; 
+						        }
+						    }
+						}
+
+						// function login(showhide){
+						// 	if(showhide == "show"){
+						// 	    document.getElementById('popupbox').style.visibility="visible";
+						// 	}else if(showhide == "hide"){
+						// 	    document.getElementById('popupbox').style.visibility="hidden"; 
+						// 	}
+						// 	}
+							// Get the modal
+							var modal = document.getElementById('id01');
+							var modal2 = document.getElementById('id02');
+
+							// When the user clicks anywhere outside of the modal, close it
+							window.onclick = function(event) {
+							    if (event.target == modal) {
+							        modal.style.display = "none";
+							    }
+							    else if (event.target == modal2) {
+							        modal.style.display = "none";
+							    }
+							}
+					</script>
+
+	</head>
+	<body>
+		<div class="wrap">
+		<!----start-Header---->
+		<div class="header">
+			<div class="search-bar">
+				<form>
+					<input type="text"><input type="submit" value="Search" />
+				</form>
+			</div>
+			<div class="clear"> </div>
+			<div class="header-top-nav">
+				<ul>
+					
+							<div id="id01" class="modal">
+  
+							  <form class="modal-content animate" action="/index-Copy.php">
+							    <div class="imgcontainer">
+							      <span onclick="document.getElementById('id01').style.display='none'" class="closelog" title="Close Modal">&times;</span>
+							      <img src="images/img_avatar2.png" style="max-height: 150px;max-width:150px;" alt="Avatar" class="avatar">
+							    </div>
+
+							    <div class="container">
+							      <label><b>Username</b></label>
+							      <input type="text" placeholder="Enter Username" name="uid" required>
+
+							      <label><b>Password</b></label>
+							      <input type="password" placeholder="Enter Password" name="pwd" required>
+							        
+							      <!-- <button type="submit" class="buttonlog">Login</button> -->
+							      <button class="buttonlog" id="logbtn">Login</button>
+							      <input type="checkbox" checked="checked"> Remember me
+							    </div>
+
+							    <div class="container" style="background-color:#f1f1f1">
+							      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn" id="log_cancle_btn">Cancel</button>
+							      <span class="psw">Forgot <a href="#">password?</a></span>
+							    </div>
+							  </form>
+							</div>
+
+							<div id="id02" class="modal2">
+  
+							  <form class="modal2-content animate" action="/index-Copy.php">
+							    <div class="imgcontainer">
+							      <span onclick="document.getElementById('id02').style.display='none'" class="closelog" title="Close Modal">&times;</span>
+							      <img src="images/img_avatar2.png" style="max-height: 150px;max-width:150px;" alt="Avatar" class="avatar">
+							    </div>
+
+							    <div class="container">
+							    	<label><b>Full Name</b></label>
+							      <input type="text" placeholder="Enter Full Name" name="r_uname" required>
+							      <label><b>Email Address</b></label>
+							      <input type="text" placeholder="Email Address(www.example@gmail.com)" name="r_email" required>
+							      <label><b>Username</b></label>
+							      <input type="text" placeholder="Enter Username" name="r_uid" required>
+
+							      <label><b>Password</b></label>
+							      <input type="password" placeholder="Enter Password" name="r_pwd" required>
+							        
+							      <!-- <button type="submit" class="buttonlog">Login</button> -->
+							      <button class="buttonlog" id="regbtn">Register</button>
+							      
+							    </div>
+
+							    <div class="container" style="background-color:#f1f1f1">
+							      <button type="button" onclick="document.getElementById('id02').style.display='none'" class="cancelbtn" id="log_cancle_btn">Cancel</button>
+							      
+							    </div>
+							  </form>
+							</div>
+
+							
+							
+							
+					<li><a href="#"><lable onclick="document.getElementById('id02').style.display='block'" style="width:auto; height: auto; ">Register</lable></a></li>
+					<li><a href="#" ><lable onclick="document.getElementById('id01').style.display='block'" style="width:auto; height: auto; ">Login</lable></a></li>
+					<li><a href="#">Develivery</a></li>
+					<li><a href="#">Checkout</a></li>
+					<li><a href="#">My account</a></li>
+					<li><a href="javascript:void(0)"><span>shopingcart&nbsp;&nbsp;: </span></a><lable> &nbsp; <span>0</span><input type="hidden" name="total-hidden-charges" id="total-hidden-charges" value="0" /></lable></li>
+				</ul>
+			</div>
+			<div class="clear"> </div>
+		</div>
+		</div>
+		<div class="clear"> </div>
+		<div class="top-header">
+			<div class="wrap">
+		<!----start-logo---->
+			<div class="logo">
+				<a href="index.html"><img src="images/logo1.png" title="logo" /></a>
+			</div>
+		<!----end-logo---->
+		<!----start-top-nav---->
+		<div class="top-nav">
+			<ul>
+				<li><a href="index.html">Home</a></li>
+				<li><a href="about.html">About</a></li>
+				<li><a href="store.html">Store</a></li>
+				<!-- <li><a href="store.html">Featured</a></li> -->
+				<!-- <li><a href="blog.html">Blog</a></li> -->
+				<li><a href="contact.html">Contact</a></li>
+				<li><a href=""></a></li>
+			</ul>
+		</div>
+		<div class="clear"> </div>
+		</div>
+		</div>
+		<!----End-top-nav---->
+		<!----End-Header---->
+		    <div class="clear"> </div>
+		    <div class="wrap">
+		    <div class="content">
+		    <div class="content-grids">
+		    	
+<div align="left" style="min-height:800px;">
+	
+	<div id="cart_wrapper" align="center">
+	
+		<form action="#" id="cart_form" name="cart_form">
+		
+			<div class="cart-info"> </div>
+			
+			<div class="cart-total">
+			
+				<b>Total Charges:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b> $<span>0</span>
+				
+				<input type="hidden" name="total-hidden-charges" id="total-hidden-charges" value="0" />
+			</div>
+			
+			<button type="submit" id="Submit">CheckOut</button>
+		
+		</form>
+	</div>
+	
+	<div id="wrap" align="center">
+		
+		<a id="show_cart" href="javascript:void(0)">View My Cart</a>
+
+		
+		<ul>
+			<li id="1">
+				<img src="images/apple-apple-iphone-7-plus-128gb.jpg" class="items" alt="" />
+				
+				<br clear="all" />
+				<div>Apple iPhone7 Plus</div>
+			</li>
+			
+			<li id="2">
+				<img src="images/apple-apple-iphone-7-128gb.png" class="items" alt="" />
+				
+				<br clear="all" />
+				<div>Apple iPhone7 128gb</div>
+			</li>
+			
+			<li id="3">
+				<img src="images/apple-apple-iphone-7-32gb.png" class="items" alt="" />
+				
+				<br clear="all" />
+				<div>Apple iPhone7 32gb</div>
+			</li>
+			<li id="4">
+				<img src="images/i-phone-6s.jpg" class="items" alt="" />
+				
+				<br clear="all" />
+				<div>Apple iPhone6s Plus</div>
+			</li>
+			
+			<!-- Detail Boxes for above four li -->
+			
+			<div class="detail-view" id="detail-1" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/iphone7-jetblack-select-2016.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Apple iPhone7 Plus</h1></label>
+					<h1 id="h1styl" >Apple iPhone7 Plus</h1>
+					<br clear="all" />
+					
+					<p>
+						The phone comes with a 5.50-inch touchscreen display with a resolution of 1080 pixels by 1920 pixels at a PPI of 401 pixels per inch. Apple iPhone 7 Plus normal price in Sri Lanka  $ 1300.00. The Apple iPhone 7 Plus is powered by quad-core Apple A10 Fusion processor and it comes with 3GB of RAM.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">800.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/apple_iphone_7_plus-8065.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-2" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/iphone7-rosegold-select-2016.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Apple iPhone7</h1></label>
+					<h1 id="h1styl" >Apple iPhone7 </h1>
+					<br clear="all" />
+					
+					<p>
+						Apple iPhone 7. Apple iPhone 7 smartphone was launched in September 2016. The phone comes with a 4.70-inch touchscreen display with a resolution of 750 pixels by 1334 pixels at a PPI of 326 pixels per inch.Powered by Apple A10 Fusion processor and it comes with 2GB of RAM. Apple iPhone 7 normal price in  Sri Lanka  $1160.00 .
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">700.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/apple_iphone_7-8064.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-3" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/iphone7-plus-black-select-2016.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Apple iPhone7 32gb</h1></label>
+					<h1 id="h1styl" >Apple iPhone7 32gb</h1>
+					<br clear="all" />
+					
+					<p>
+						Apple iPhone 7. Apple iPhone 7 smartphone was launched in September 2016. The phone comes with a 4.70-inch touchscreen display with a resolution of 750 pixels by 1334 pixels at a PPI of 326 pixels per inch.Powered by Apple A10 Fusion processor and it comes with 2GB of RAM and the inbuilt memory is 32GB. Apple iPhone 7 normal price in  Sri Lanka  $1160.00 .
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">600.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+
+					<form id="formspec" action="http://www.gsmarena.com/apple_iphone_7-8064.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-4" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/iphone6s-plus-gray-select-2015.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Apple iPhone6s Plus</h1></label>
+					<h1 id="h1styl" >Apple iPhone6s Plus</h1>
+					<br clear="all" />
+					
+					<p>
+						Apple iPhone 6s Plus smartphone was launched in September 2015. The phone comes with a 5.50-inch touchscreen display with a resolution of 1080 pixels by 1920 pixels at a PPI of 401 pixels per inch.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">550.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/apple_iphone_6s_plus-7243.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			
+			<!---->
+			
+			<li id="5">
+				<img src="images/rsz_large.png" class="items" alt="" />
+				
+				<br clear="all" />
+				<div style="margin-top: 30px;">HTC U11</div>
+			</li>
+			
+			<li id="6">
+				<img src="images/rsz_htc-10-one-m10-gold-3-500x500.jpg" class="items" alt="" />
+				
+				<br clear="all" />
+				<div style="margin-top: 40px;">HTC M10</div>
+			</li>
+			
+			<li id="7">
+				<img src="images/htc-htc-u-play.png" class="items" alt="" />
+				
+				<br clear="all" />
+				<div>HTC U Play</div>
+			</li>
+			<li id="8">
+				<img src="images/htc-one-m9-plus-Price-In-Srilanka.png" class="items" alt="" />
+				
+				<br clear="all" />
+				<div>HTC M9 Plus</div>
+			</li>
+			
+			<!-- Detail Boxes for above four li -->
+			
+			<div class="detail-view" id="detail-5" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/large.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >HTC U11</h1></label>
+					<h1 id="h1styl" >HTC U11</h1>
+					<br clear="all" />
+					
+					<p>
+						he HTC U11 was announced with a price tag of which is roughly about .It has 64 GB Inbuit Memory, 4 GB RAM or 128 GB Inbuit Memory, 6 GB RAM. It is said to be available on various e-commerce portals in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">800.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/apple_iphone_7_plus-8065.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-6" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/htc-10-global-glacier-silver-angled-listing.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >HTC M10</h1></label>
+					<h1 id="h1styl" >HTC M10</h1>
+					<br clear="all" />
+					
+					<p>
+						he HTC U10 was announced with a price tag of which is roughly about .It has 64 GB Inbuit Memory, 3 GB RAM or 128 GB Inbuit Memory, 4 GB RAM. It is said to be available on various e-commerce portals in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">700.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/htc_10-7884.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-7" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/htc-htc-u-play.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >HTC U Play</h1></label>
+					<h1 id="h1styl" >HTC U Play</h1>
+					<br clear="all" />
+					
+					<p>
+						he HTC U Play was announced with a price tag of which is roughly about .It has 3GB RAM. It is said to be available on various e-commerce portals in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">750.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/htc_u_play-8518.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-8" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/htc-hima-screen-protector-listing-240x240.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >HTC M9 Plus</h1></label>
+					<h1 id="h1styl" >HTC M9 Plus</h1>
+					<br clear="all" />
+					
+					<p>
+						he HTC M9 Plus was announced with a price tag of which is roughly about .It has 3GB RAM. Best Amazing Price deal for HTC One M9+ price in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">800.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/htc_one_m9+-6977.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			
+			<!---->
+			
+			<li id="9">
+				<img src="images/nokia-nokia-6-4gb-ram-64gb.png" class="items" alt="" />
+				
+				<br clear="all" />
+				<div><span class="name"></span><span class="price"></span>Nokia 6</div>
+			</li>
+			
+			<li id="10">
+				<img src="images/nokia-nokia-x6.jpg" class="items" alt="" />
+				
+				<br clear="all" />
+				<div><span class="name">Nokia x6 </span> </div>
+			</li>
+			
+			<li id="11">
+				<img src="images/nokia-nokia-3.jpg" class="items" alt="" />
+				
+				<br clear="all" />
+				<div>Nokia 3</div>
+			</li>
+			
+			<li id="12">
+				<img src="images/nokia-105.png" class="items" alt="" />
+				
+				<br clear="all" />
+				<div><span class="name">Nokia 105 </span></div>
+			</li>
+			
+			<!-- Detail Boxes for above four li -->
+			
+			<div class="detail-view" id="detail-9" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/nokia-nokia-6-4gb-ram-64gb.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Nokia 6</h1></label>
+					<h1 id="h1styl" >Nokia 6</h1>
+					<br clear="all" />
+					
+					<p>
+						Nokia 6 was announced with a price tag of which is roughly about .It has 3GB RAM. Best Amazing Price deal for Nokia 6 price in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">800.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/nokia_6-6885.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-10" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/nokia-nokia-x6.jpg" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Nokia X6</h1></label>
+					<h1 id="h1styl" >Nokia X6</h1>
+					<br clear="all" />
+					
+					<p>
+						Nokia X6 Plus was announced with a price tag of which is roughly about .It has 3GB RAM. Best Amazing Price deal for Nokia X6 price in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">800.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/nokia_x6-2922.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-11" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/nokia-nokia-3.jpg" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >NOKIA 3</h1></label>
+					<h1 id="h1styl" >NOKIA 3</h1>
+					<br clear="all" />
+					
+					<p>
+						he NOKIA 3 was announced with a price tag of which is roughly about .It has 2GB RAM. Best Amazing Price deal for Nokia 3 price in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">250.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/nokia_3-8572.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-12" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/nokia-105.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Nokia 105</h1></label>
+					<h1 id="h1styl" >Nokia 105</h1>
+					<br clear="all" />
+					
+					<p>
+						Nokia 105 was announced with a price tag of which is roughly about .Best Amazing Price deal for Nokia 105 price in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">50.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/nokia_105-5324.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			
+			<!---->
+			
+			<li id="13">
+				<img src="images/samsung-samsung-galaxy-s8-plus.jpg" class="items" alt="" />
+				
+				<br clear="all" />
+				<div><span class="name">Samsung Galaxy S8 Plus</span>  </div>
+			</li>
+			
+			<li id="14">
+				<img src="images/samsung-samsung-galaxy-s8.png" class="items" alt="" />
+				
+				<br clear="all" />
+				<div><span class="name">Samsung Galaxy S8  </span>  </div>
+			</li>
+			
+			<li id="15">
+				<img src="images/samsung-galaxy-c9-pro.jpg" class="items" alt="" />
+				
+				<br clear="all" />
+				<div><span class="name">Samsung Galaxy C9 Pro</span>  </div>
+			</li>
+			
+			<li id="16">
+				<img src="images/Samsung Galaxy A7 (2016).jpg" class="items" alt="" />
+				
+				<br clear="all" />
+				<div><span class="name">Samsung Galaxy A7</span>  </div>
+			</li>
+			
+			<!-- Detail Boxes for above four li -->
+			
+			<div class="detail-view" id="detail-13" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/samsung-samsung-galaxy-s8-plus.jpg" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Samsung Galaxy S8 Plus</h1></label>
+					<h1 id="h1styl" >Samsung Galaxy S8 Plus</h1>
+					<br clear="all" />
+					
+					<p>
+						Samsung Galaxy S8 Plus was announced with a price tag of which is roughly about .It has 4GB RAM. Best Amazing Price deal for Samsung Galaxy S8 Plus price in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">800.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/samsung_galaxy_s8+-8523.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-14" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/samsung-samsung-galaxy-s8.png" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Samsung Galaxy S8</h1></label>
+					<h1 id="h1styl" >Samsung Galaxy S8</h1>
+					<br clear="all" />
+					
+					<p>
+						Samsung Galaxy S8 was announced with a price tag of which is roughly about .It has 3GB RAM. Best Amazing Price deal for Samsung Galaxy S8 price in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">750.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/samsung_galaxy_s8-8161.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-15" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/samsung-galaxy-c9-pro.jpg" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Samsung Galaxy C9 PRO</h1></label>
+					<h1 id="h1styl" >Samsung Galaxy C9 PRO</h1>
+					<br clear="all" />
+					
+					<p>
+						Samsung Galaxy C9 PRO was announced with a price tag of which is roughly about .It has 6GB RAM. Best Amazing Price deal for Samsung Galaxy C9 PRO price in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">800.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/samsung_galaxy_c7_pro-8435.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			<div class="detail-view" id="detail-16" style="border-color: black;" >
+			
+				<div class="close" align="right">
+					<a href="javascript:void(0)">x</a>
+					
+				</div>
+				
+				<img src="images/Samsung Galaxy A7 (2016).jpg" class="detail_images" alt="" />
+				
+				<div class="detail_info" style="text-align: justify;background-color: #cce6ff;padding: 20px;">
+					
+					<label class='item_name' for="foo" id="foo_label"><h1 >Samsung Galaxy A7 </h1></label>
+					<h1 id="h1styl" >Samsung Galaxy A7 </h1>
+					<br clear="all" />
+					
+					<p>
+						Samsung Galaxy A7  was announced with a price tag of which is roughly about .It has 3GB RAM. Best Amazing Price deal for Samsung Galaxy A7  price in Sri Lanka at My Mobile.
+								
+						<br clear="all" /><br clear="all" />
+						$ <span class="price" style="color: #ff1a1a;font-size: 18px;">600.00</span>
+						
+					</p>
+					
+					<br clear="all" />
+					
+					<button  class="add-to-cart-button" onclick="move();">Add to Cart</button>
+					<form id="formspec" action="http://www.gsmarena.com/samsung_galaxy_a7-6763.php">
+    						<button type="submit"  class="specifications-button" id="myBtn"  >Specification</button>
+						</form>
+					
+					<div id="myProgress">
+						  <div id="myBar"></div>
+						</div>
+					<br>
+					<strong style="font-size: 13px; margin-top: 10px; font-weight: bold;">Our Partners : </strong><br>
+					<img src="images/credit-cards-logos.png" id="imgvisa">
+				</div>
+							
+			</div>
+			
+			<br clear="all" />
+		</ul>
+		<br clear="all" />
+	</div>
+	
+		
+</div>
+
+		    </div>
+		    </div>
+		    	<div class="content-sidebar">
+		    		<h4>Categories</h4>
+						<ul>
+							<li><a href="Apple.html">Apple iphone</a></li>
+							<li><a href="Nokia.html">Nokia</a></li>
+							<li><a href="Samsung.html">Samsung Mobiles</a></li>
+							<li><a href="HTC.html">HTC</a></li>
+							<li><a href="#">Asus</a></li>
+							<li><a href="#">Blackberry</a></li>
+							<li><a href="#">Huawei</a></li>
+							<li><a href="#">Sony</a></li>
+							<li><a href="#">Oppo</a></li>
+							<li><a href="#">Google</a></li>
+							<li><a href="#">Xiaomi </a></li>
+							<li><a href="#">LG Mobiles</a></li>
+							<li><a href="#">Motorola</a></li>
+							<li><a href="#">Micromax Mobiles </a></li>
+						</ul>
+		    	</div>
+		    </div>
+		    <div class="clear"> </div>
+		    </div>
+		<div class="footer">
+			<div class="wrap">
+			<div class="section group">
+				<div class="col_1_of_4 span_1_of_4">
+					<h3>Our Info</h3>
+					<p>"We believe Quality & Affordability pay the final dividend….
+						…It is always the result of Commitment, Sincere Effort,
+						Intelligent Direction and Skillful Execution".</p>
+				</div>
+				<div class="col_1_of_4 span_1_of_4">
+					<h3>Latest-News</h3>
+					<p>Samsung Galaxy Note 8 Launch Set for August 23.</p>
+					<p>Nokia 6, Nokia 5 Will Release in India in Mid-August, Says HMD Global.</p>
+					<p>iPhone 8 Reportedly Facing New Issues With Wireless Charging, 3D Front Sensor.</p>
+				</div>
+				<div class="col_1_of_4 span_1_of_4">
+					<h3>Store Location</h3>
+					<p>No 641/02,Unity Plaza,Colombo 04 <br>	Sri Lanka</p>
+					<h3>Order-online</h3>
+					<p>(+94)715887573</p>
+					<p>(+94)767418074</p>
+				</div>
+				<div class="col_1_of_4 span_1_of_4 footer-lastgrid">
+					<h3>News-Letter</h3>
+					<input type="text"><input type="submit" value="go" />
+					<h3>Fallow Us:</h3>
+					<ul>
+					 	<li><a href="#"><img src="images/twitter.png" title="twitter" />Twitter</a></li>
+					 	<li><a href="#"><img src="images/facebook.png" title="Facebook" />Facebook</a></li>
+					 	<li><a href="#"><img src="images/rss.png" title="Rss" />Rss</a></li>
+					 </ul>
+				</div>
+			</div>
+		</div>
+		</div>
+	</body>
+</html>
+
